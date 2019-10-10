@@ -252,9 +252,7 @@ onGridReady=(params)=> {
         height: '1500px', 
          }} 
       >
-<button>
-  button
-</button>
+
 
         <AgGridReact
                     
