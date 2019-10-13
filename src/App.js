@@ -153,10 +153,16 @@ class App extends Component {
   onColumnResized=(e)=> {
     console.log(e);
     
-    this.setState({ columnSize : {colId:e.column.colId , actualWidth:e.column.actualWidth}
-    });
-    this.onGridReady(e)
-    console.log("this",this)
+      this.setState ((state)=>({
+          columnDefs:state.columnDefs.map((col)=>(col.field===e.column.colDef.field)? {...col , width:e.column.actualWidth} : {...col})
+    })
+    ) 
+
+  
+
+
+    // this.onGridReady(e)
+    console.log("state",this.state.columnDefs)
   
     
 
@@ -200,16 +206,13 @@ onGridReady=(params)=> {
         name: "Pin Left",
         action: ()=> {
           console.log("colId", params.column.colId ,"pinDir" , "left")
-          
           this.setState(
             (state)=>({
               columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"left"} : {...col} )
             })
           )
-
-         
           console.log('state', this.state)
-          
+
         },
        
       },
