@@ -19,16 +19,19 @@ class App extends Component {
       columnDefs: [
         {
           headerName: "ID",
-          width: 50,
+          // width: 50,
           filter: "agNumberColumnFilter",
           valueGetter: "node.id",
+          pinned:""
+
 
         },
         {
           headerName: "Athlete",
           field: "athlete",
-          width: 150,
+          // width: 150,
           filter: "agTextColumnFilter",
+          pinned:"",
          
           filterParams: {
             
@@ -41,63 +44,63 @@ class App extends Component {
         {
           headerName: "Age",
           field: "age",
-          width: 90,
+          // width: 90,
           pinned:'',
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Country",
           field: "country",
-          width: 120,
+          // width: 120,
           pinned:'',
           filter:"agTextColumnFilter",
         },
         {
           headerName: "Year",
           field: "year",
-          width: 90,
+          // width: 90,
           pinned:'',
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Date",
           field: "date",
-          width: 110,
+          // width: 110,
           pinned:'',
           filter: "agDateColumnFilter",
         },
         {
           headerName: "Sport",
           field: "sport",
-          width: 100,
+          // width: 100,
           pinned:'',
           filter:"agTextColumnFilter",
         },
         {
           headerName: "Gold",
           field: "gold",
-          width: 100,
+          // width: 100,
           pinned:'',
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Silver",
           field: "silver",
-          width: 100,
+          // width: 100,
           pinned:'',
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Bronze",
           field: "bronze",
-          width: 100,
+          // width: 100,
           pinned:'',
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Total",
           field: "total",
-          width: 100,
+          // width: 100,
           pinned:'',
           filter: "agNumberColumnFilter",
           
@@ -106,7 +109,10 @@ class App extends Component {
 
       
       defaultColDef: { 
-        menuTabs: ['generalMenuTab', 'filterMenuTab', 'columnsMenuTab'],
+        width:80,
+        checkboxSelection:true,
+
+        menuTabs: ['generalMenuTab', 'filterMenuTab'],
                         sortable: true ,
                         filter: true ,
                         resizable: true,
@@ -153,7 +159,10 @@ class App extends Component {
   onColumnResized=(e)=> {
     console.log(e);
     
-      this.setState ((state)=>({
+    // this.setState({ columnSize : {colId:e.column.colId , actualWidth:e.column.actualWidth}
+    // }); 
+
+    this.setState ((state)=>({
           columnDefs:state.columnDefs.map((col)=>(col.field===e.column.colDef.field)? {...col , width:e.column.actualWidth} : {...col})
     })
     ) 
@@ -206,6 +215,7 @@ onGridReady=(params)=> {
         name: "Pin Left",
         action: ()=> {
           console.log("colId", params.column.colId ,"pinDir" , "left")
+
           this.setState(
             (state)=>({
               columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"left"} : {...col} )
@@ -244,13 +254,49 @@ onGridReady=(params)=> {
       
     }
 
+    onColumnMoved=(params)=>{
+      console.log('colum moved' , params)
+
+      // params.columnApi.moveColumns((params.column.colDef.field), params.toIndex);
+
+      let oldIndex;
+      let newIndex;
+      
+     
+           
+      oldIndex=(params.column.colDef)?(this.state.columnDefs.findIndex((col)=>(col.field===params.column.colDef.field))):""; 
+      newIndex=params.toIndex; 
+
+      console.log(oldIndex , newIndex)
+        
+      const {columnDefs} = this.state ;
+
+      this.columns_move(columnDefs,oldIndex,newIndex); 
+
+      console.log(this.state.columnDefs)
+
+    }
+      
+    columns_move=(columns, oldIndex, newIndex)=> {
+      
+      columns.splice(newIndex, 0, columns.splice(oldIndex, 1)[0]);
+      return columns, 
+      this.setState({
+        columnDefs:columns
+      })
+;
+  };  
+    
+
+     
+
 
 
 
   render() {
     return (
       <div 
-        className="ag-theme-balham"
+        className="ag-theme-balham qu-ag-grid"
         style={{ 
         height: '1500px', 
          }} 
@@ -268,8 +314,13 @@ onGridReady=(params)=> {
             pagination={true}
             paginationAutoPageSize={true}
             getMainMenuItems={this.getMainMenuItems}
+            onColumnMoved= {this.onColumnMoved}
             //pin filter menu
             suppressMenuHide = {true}
+            //Row Selection
+            rowSelection={this.state.rowSelection}
+            rowMultiSelectWithClick={true}
+
             
 
           
