@@ -6,32 +6,34 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import axios from 'axios';
 import 'ag-grid-enterprise';
 
+
 class App extends Component {
  
  
     state = {
 
-      columnSize :{
-        colId:'', 
-        actualWidth:''
-      },
+      rowEdited :[],
 
       columnDefs: [
         {
           headerName: "ID",
-          // width: 50,
+          width: 50,
           filter: "agNumberColumnFilter",
           valueGetter: "node.id",
-          pinned:""
+          pinned:'',
+          hide:null,
+         
 
 
         },
         {
           headerName: "Athlete",
           field: "athlete",
-          // width: 150,
+          width: 150,
           filter: "agTextColumnFilter",
-          pinned:"",
+          pinned:'',
+          hide:null,
+          editable:true,
          
           filterParams: {
             
@@ -44,75 +46,87 @@ class App extends Component {
         {
           headerName: "Age",
           field: "age",
-          // width: 90,
+          width: 90,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Country",
           field: "country",
-          // width: 120,
+          width: 120,
           pinned:'',
+           hide:null,
           filter:"agTextColumnFilter",
         },
         {
           headerName: "Year",
           field: "year",
-          // width: 90,
+          width: 90,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Date",
           field: "date",
-          // width: 110,
+          width: 110,
           pinned:'',
+           hide:null,
           filter: "agDateColumnFilter",
         },
         {
           headerName: "Sport",
           field: "sport",
-          // width: 100,
+          width: 100,
           pinned:'',
+           hide:null,
           filter:"agTextColumnFilter",
         },
         {
           headerName: "Gold",
           field: "gold",
-          // width: 100,
+          width: 100,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Silver",
           field: "silver",
-          // width: 100,
+          width: 100,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Bronze",
           field: "bronze",
-          // width: 100,
+          width: 100,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
         },
         {
           headerName: "Total",
           field: "total",
-          // width: 100,
+          width: 100,
           pinned:'',
+           hide:null,
           filter: "agNumberColumnFilter",
           
         }
       ],
 
       
-      defaultColDef: { 
-        width:80,
-        checkboxSelection:true,
 
-        menuTabs: ['generalMenuTab', 'filterMenuTab'],
+      
+      defaultColDef: { 
+        width:110,
+        
+        // checkboxSelection:true,
+
+        menuTabs: ['generalMenuTab', 'filterMenuTab' ,'columnsMenuTab'],
                         sortable: true ,
                         filter: true ,
                         resizable: true,
@@ -157,24 +171,26 @@ class App extends Component {
     };
   
   onColumnResized=(e)=> {
-    console.log(e);
+    console.log("event of column resized",e);
     
-    // this.setState({ columnSize : {colId:e.column.colId , actualWidth:e.column.actualWidth}
-    // }); 
+    let colsInfo;
 
-    this.setState ((state)=>({
-          columnDefs:state.columnDefs.map((col)=>(col.field===e.column.colDef.field)? {...col , width:e.column.actualWidth} : {...col})
-    })
-    ) 
+    colsInfo=e.columns;
+            
+          for (let i=0 ; i < colsInfo.length ; i++) {
+           this.setState(({
+             columnDefs : this.state.columnDefs.map((col)=>(
+           (col.field === colsInfo[i].colDef.field)? {
+            ...col , width:colsInfo[i].actualWidth
+           }:
+           {...col}
+           ))
+          }))
+           
+          }
 
-  
-
-
-    // this.onGridReady(e)
     console.log("state",this.state.columnDefs)
-  
-    
-
+    console.log("columns" ,colsInfo)
     
   }
   
@@ -184,17 +200,13 @@ onGridReady=(params)=> {
    
     const datasource = {
        
-
         getRows: (params) => {
           
-            console.log('params', params) ; 
-           
-
-            const {columnSize} = this.state
-            console.log(columnSize)
+            console.log('params of getRows', params) ; 
+          //  const {rowEdited}=this.state;
             
           axios.get('https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinners.json',{
-          params:[params.request ,  columnSize ]
+          params:[params.request]
            
     })
       .then(((res) => res.data))
@@ -208,51 +220,7 @@ onGridReady=(params)=> {
 }
 
 
-    getMainMenuItems=(params)=> {
-      console.log(params)
-    return [
-      {
-        name: "Pin Left",
-        action: ()=> {
-          console.log("colId", params.column.colId ,"pinDir" , "left")
-
-          this.setState(
-            (state)=>({
-              columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"left"} : {...col} )
-            })
-          )
-          console.log('state', this.state)
-
-        },
-       
-      },
-      {
-        name: "Pin Right",
-        action: ()=> {
-          this.setState(
-            (state)=>({
-              columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"right"} : {...col} )
-            })
-          )
-
-        },
-       
-      },
-
-      {name: "No Pin" ,
-      action: ()=> {
-        this.setState(
-          (state)=>({
-            columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:""} : {...col} )
-          })
-        )
-
-      }
-    }
-    ]; ;
-    
-      
-    }
+    // 
 
     onColumnMoved=(params)=>{
       console.log('colum moved' , params)
@@ -264,7 +232,7 @@ onGridReady=(params)=> {
       
      
            
-      oldIndex=(params.column.colDef)?(this.state.columnDefs.findIndex((col)=>(col.field===params.column.colDef.field))):""; 
+      oldIndex=(params.column!==null)?(this.state.columnDefs.findIndex((col)=>(col.field===params.column.colDef.field))):""; 
       newIndex=params.toIndex; 
 
       console.log(oldIndex , newIndex)
@@ -287,11 +255,46 @@ onGridReady=(params)=> {
 ;
   };  
     
+  // edit Row Table Cell 
 
-     
+  onCellValueChanged= (params)=> {
+    const {rowIndex , oldValue , newValue , data  } =params; 
+    const {field} = params.column.colDef;
+    this.setState((state)=>({
+      rowEdited:[...state.rowEdited , {rowIndex , oldValue , newValue , data ,field}  ]
+    })
+    )
+    console.log(params)
+    console.log(this.state.rowEdited)
+    // this.onGridReady(params)
+}
+
+
+onDisplayedColumnsChanged =(params)=>{
+  console.log("DisplayedColumnsChanged",params)
+}
 
 
 
+onColumnPinned =(params)=>{
+  console.log("pinned params",params);
+  this.setState(
+    ({
+      columnDefs:this.state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:params.pinned} : {...col} )
+    }));
+    console.log(this.state.columnDefs)
+  }
+ 
+  onColumnVisible=(params)=>{
+    console.log("col visible",params); 
+      this.setState(
+      ({
+          columnDefs:this.state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , hide:!params.visible} : {...col} )
+        }));
+
+  
+      console.log(this.state.columnDefs);
+  }
 
   render() {
     return (
@@ -301,7 +304,7 @@ onGridReady=(params)=> {
         height: '1500px', 
          }} 
       >
-
+      
 
         <AgGridReact
                     
@@ -313,13 +316,21 @@ onGridReady=(params)=> {
             onColumnResized={this.onColumnResized}
             pagination={true}
             paginationAutoPageSize={true}
-            getMainMenuItems={this.getMainMenuItems}
+           
             onColumnMoved= {this.onColumnMoved}
             //pin filter menu
             suppressMenuHide = {true}
-            //Row Selection
-            rowSelection={this.state.rowSelection}
-            rowMultiSelectWithClick={true}
+            // //Row Selection
+            // rowSelection={this.state.rowSelection}
+            // rowMultiSelectWithClick={true}
+            onCellValueChanged={this.onCellValueChanged}
+
+            onColumnPinned ={this.onColumnPinned}
+
+            // onDisplayedColumnsChanged={this.onDisplayedColumnsChanged}
+            onDragStopped={this.onDragStopped}
+            onColumnVisible={this.onColumnVisible}
+             // getMainMenuItems={this.getMainMenuItems}
 
             
 
@@ -333,3 +344,48 @@ onGridReady=(params)=> {
 
 export default App;
 
+// getMainMenuItems=(params)=> {
+  //   console.log(params)
+  // return [
+  //   {
+  //     name: "Pin Left",
+  //     action: ()=> {
+  //       console.log("colId", params.column.colId ,"pinDir" , "left")
+
+  //       this.setState(
+  //         (state)=>({
+  //           columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"left"} : {...col} )
+  //         })
+  //       )
+  //       console.log('state', this.state)
+
+  //     },
+     
+  //   },
+  //   {
+  //     name: "Pin Right",
+  //     action: ()=> {
+  //       this.setState(
+  //         (state)=>({
+  //           columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:"right"} : {...col} )
+  //         })
+  //       )
+
+  //     },
+     
+  //   },
+
+  //   {name: "No Pin" ,
+  //   action: ()=> {
+  //     this.setState(
+  //       (state)=>({
+  //         columnDefs:state.columnDefs.map((col)=>(col.field===params.column.colDef.field)? {...col , pinned:""} : {...col} )
+  //       })
+  //     )
+
+  //   }
+  // }
+  // ]; ;
+  
+    
+  // }
