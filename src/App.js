@@ -5,6 +5,7 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import axios from 'axios';
 import 'ag-grid-enterprise';
+import NumericCellEditor from './NumericCellEditor';
 
 
 class App extends Component {
@@ -12,20 +13,23 @@ class App extends Component {
  
     state = {
 
-      rowEdited :[],
+      selectedRows:[],
 
+      rowEdited :[],
+      rowSelection:'multiple',
+        
       columnDefs: [
-        {
-          headerName: "ID",
-          width: 50,
-          filter: "agNumberColumnFilter",
-          valueGetter: "node.id",
-          pinned:'',
-          hide:null,
+        // {
+        //   headerName: "ID",
+        //   width: 50,
+        //   filter: "agNumberColumnFilter",
+        //   valueGetter: "node.id",
+        //   pinned:'',
+        //   hide:null,
          
 
 
-        },
+        // },
         {
           headerName: "Athlete",
           field: "athlete",
@@ -33,7 +37,7 @@ class App extends Component {
           filter: "agTextColumnFilter",
           pinned:'',
           hide:null,
-          editable:true,
+          
          
           filterParams: {
             
@@ -48,15 +52,17 @@ class App extends Component {
           field: "age",
           width: 90,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          cellEditorFramework:NumericCellEditor           
+
         },
         {
           headerName: "Country",
           field: "country",
           width: 120,
           pinned:'',
-           hide:null,
+          hide:null,
           filter:"agTextColumnFilter",
         },
         {
@@ -64,16 +70,19 @@ class App extends Component {
           field: "year",
           width: 90,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          cellEditorFramework:NumericCellEditor
+          
         },
         {
           headerName: "Date",
           field: "date",
           width: 110,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agDateColumnFilter",
+          cellEditor: 'dateCellEditor'
         },
         {
           headerName: "Sport",
@@ -88,32 +97,40 @@ class App extends Component {
           field: "gold",
           width: 100,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          cellEditorFramework:NumericCellEditor
+          
         },
         {
           headerName: "Silver",
           field: "silver",
           width: 100,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          cellEditorFramework:NumericCellEditor
+          
         },
         {
           headerName: "Bronze",
           field: "bronze",
           width: 100,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          cellEditorFramework:NumericCellEditor
+          
         },
         {
           headerName: "Total",
           field: "total",
           width: 100,
           pinned:'',
-           hide:null,
+          hide:null,
           filter: "agNumberColumnFilter",
+          
+          
           
         }
       ],
@@ -123,6 +140,7 @@ class App extends Component {
       
       defaultColDef: { 
         width:110,
+        editable:true,
         
         // checkboxSelection:true,
 
@@ -130,6 +148,7 @@ class App extends Component {
                         sortable: true ,
                         filter: true ,
                         resizable: true,
+                        
                         filterParams: {
             
                           applyButton: true,
@@ -166,8 +185,9 @@ class App extends Component {
       cacheOverflowSize: 150,
       maxConcurrentDatasourceRequests: 1,
       infiniteInitialRowCount: 100,
-      maxBlocksInCache: 10, 
-     
+      maxBlocksInCache: 10,
+      
+   
     };
   
   onColumnResized=(e)=> {
@@ -264,8 +284,8 @@ onGridReady=(params)=> {
       rowEdited:[...state.rowEdited , {rowIndex , oldValue , newValue , data ,field}  ]
     })
     )
-    console.log(params)
-    console.log(this.state.rowEdited)
+    // console.log(params)
+    // console.log(this.state.rowEdited)
     // this.onGridReady(params)
 }
 
@@ -296,6 +316,39 @@ onColumnPinned =(params)=>{
       console.log(this.state.columnDefs);
   }
 
+  // onRowSelected=(event)=>{
+  //   console.log(event)
+  // }
+
+  onSelectionChanged=(event)=>{
+    var rowCount  = event.api.getSelectedNodes();
+    let rows = rowCount.map((row)=>({data:row.data , id:row.id}));
+    this.setState({selectedRows:rows})
+    
+  }
+
+  handleSelectRowsBtn=()=>{
+    console.log("Selected Rows",...this.state.selectedRows)
+  }
+
+  handleEditRowsBtn=()=>{
+     console.log("Edited Rows",...this.state.rowEdited)
+  }
+
+  handlePostEditedRow=()=>{
+    axios.post('/row', {
+      rowEdited: this.state.rowEdited
+    })
+    .then((res)=> {
+      console.log(res);
+    })
+    .catch((err)=> {
+      console.log(err);
+    });
+
+    this.setState({rowEdited:[] })
+  }
+
   render() {
     return (
       <div 
@@ -305,6 +358,18 @@ onColumnPinned =(params)=>{
          }} 
       >
       
+         <button onClick={()=>this.handleSelectRowsBtn()}>
+           Show Selected rows 
+         </button> 
+
+         <button onClick={()=>this.handleEditRowsBtn()}>
+           Show edited rows 
+         </button> 
+
+         <button onClick={()=>this.handlePostEditedRow()} >
+           Post edited Row 
+         </button>
+
 
         <AgGridReact
                     
@@ -316,13 +381,16 @@ onColumnPinned =(params)=>{
             onColumnResized={this.onColumnResized}
             pagination={true}
             paginationAutoPageSize={true}
+         
            
             onColumnMoved= {this.onColumnMoved}
             //pin filter menu
             suppressMenuHide = {true}
-            // //Row Selection
-            // rowSelection={this.state.rowSelection}
-            // rowMultiSelectWithClick={true}
+            //Row Selection
+            rowSelection={this.state.rowSelection}
+            rowMultiSelectWithClick={true} 
+
+            //Edit cells
             onCellValueChanged={this.onCellValueChanged}
 
             onColumnPinned ={this.onColumnPinned}
@@ -331,6 +399,13 @@ onColumnPinned =(params)=>{
             onDragStopped={this.onDragStopped}
             onColumnVisible={this.onColumnVisible}
              // getMainMenuItems={this.getMainMenuItems}
+
+
+            //  onRowSelected={this.onRowSelected}
+             onSelectionChanged={this.onSelectionChanged}
+
+
+             
 
             
 
