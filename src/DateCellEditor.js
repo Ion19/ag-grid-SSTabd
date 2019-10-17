@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class NumericCellEditor extends Component {
+class DateCellEditor extends Component {
   state = {
       value:null
   }
@@ -25,13 +25,11 @@ class NumericCellEditor extends Component {
     this.setState({
       value: event.target.value
     });
-    console.log(this.props)
+    console.log(this.state.value)
   }
   
   render () {
-    return <input
-      ref="input"
-      type="number"
+    return <input type="date" 
       value={this.value}
       onChange={this.onChange}
     
@@ -39,4 +37,4 @@ class NumericCellEditor extends Component {
   }
 }
 
-export default NumericCellEditor; 
+export default DateCellEditor; 
